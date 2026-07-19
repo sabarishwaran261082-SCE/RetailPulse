@@ -1,0 +1,3 @@
+"""
+RetailPulse Forecasting Package
+"""
