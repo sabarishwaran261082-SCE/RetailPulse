@@ -239,8 +239,11 @@ Add screenshots of:
 
 ## 👨‍💻 Team
 
-- Sangeeth Saravanan
-- Team Members
+-Sabarishwaran
+-Dhivya Sudha 
+-Santhosh
+-Prateek Rajesh
+
 
 ---
 
