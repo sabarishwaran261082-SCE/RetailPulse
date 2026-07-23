@@ -241,9 +241,8 @@ Add screenshots of:
 
 -Sabarishwaran
 -Dhivya Sudha 
--Santhosh
--Prateek Rajesh
-
+-Santhosh kumar
+-Prateek Kumar
 
 ---
 
