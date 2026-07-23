@@ -23,6 +23,11 @@ LSTM_FORECAST_CSV = "lstm_forecast.csv"
 INVENTORY_OPTIMIZATION_CSV = "inventory_optimization.csv"
 CUSTOMER_CHURN_PREDICTIONS_CSV = "customer_churn_predictions.csv"
 
+
+# UI text constants
+LSTM_FORECAST_TITLE = "LSTM Forecast"
+CUSTOMER_CHURN_PAGE = "Customer Churn"
+
 # -----------------------------------------------
 # PAGE CONFIG
 # -----------------------------------------------
@@ -102,12 +107,12 @@ lstm = load_data(LSTM_FORECAST_CSV)
 inventory = load_data(INVENTORY_OPTIMIZATION_CSV)
 churn = load_data(CUSTOMER_CHURN_PREDICTIONS_CSV)
 
-st.write("Retail:", retail is not None)
-st.write("Segments:", segments is not None)
-st.write("Forecast:", forecast is not None)
-st.write("LSTM:", lstm is not None)
-st.write("Inventory:", inventory is not None)
-st.write("Churn:", churn is not None)
+#st.write("Retail:", retail is not None)
+#st.write("Segments:", segments is not None)
+#st.write("Forecast:", forecast is not None)
+#st.write("LSTM:", lstm is not None)
+#st.write("Inventory:", inventory is not None)
+#st.write("Churn:", churn is not None)
 
 # -----------------------------------------------
 # CHECK DATA
@@ -143,7 +148,7 @@ page = st.sidebar.radio(
         "Customer Segmentation",
         "Demand Forecasting",
         "Inventory Optimization",
-        "Customer Churn",
+        CUSTOMER_CHURN_PAGE,
         "Reports"
 
     ]
@@ -154,36 +159,9 @@ st.sidebar.markdown("---")
 
 st.sidebar.header("Filters")
 
-country = st.sidebar.multiselect(
-
-    "Country",
-
-    sorted(retail["Country"].unique()),
-
-    default=sorted(retail["Country"].unique())
-
-)
-
-year = st.sidebar.multiselect(
-
-    "Year",
-
-    sorted(retail["Year"].unique()),
-
-    default=sorted(retail["Year"].unique())
-
-)
-
-month = st.sidebar.multiselect(
-
-    "Month",
-
-    sorted(retail["Month"].unique()),
-
-    default=sorted(retail["Month"].unique())
-
-)
-
+country = sorted(retail["Country"].unique())
+year = sorted(retail["Year"].unique())
+month = sorted(retail["Month"].unique())
 # -----------------------------------------------
 # FILTER DATA
 # -----------------------------------------------
@@ -782,9 +760,9 @@ elif page == "Sales Analytics":
     st.subheader("📋 Sales Transactions")
 
     st.dataframe(
-        filtered.sort_values("InvoiceDate", ascending=False),
-        use_container_width=True,
-        hide_index=True
+         filtered.sort_values("InvoiceDate", ascending=False).head(100),
+         use_container_width=True,
+         hide_index=True
     )
 
 # ==========================================================
@@ -1062,13 +1040,15 @@ elif page == "Demand Forecasting":
 
     with prophet_tab:
 
+        PROPHET_FORECAST_TITLE = "Prophet Forecast"
+
         if forecast is None:
 
             st.warning(f"{SALES_FORECAST_CSV} not found.")
 
         else:
 
-            st.subheader("Prophet Forecast")
+            st.subheader(PROPHET_FORECAST_TITLE)
 
             total_predictions = len(forecast)
 
@@ -1097,7 +1077,7 @@ elif page == "Demand Forecasting":
                     forecast,
                     x="ds",
                     y="yhat",
-                    title="Prophet Forecast"
+                    title=PROPHET_FORECAST_TITLE
                 )
 
                 fig.update_traces(line_width=3)
@@ -1211,11 +1191,11 @@ elif page == "Demand Forecasting":
 
         if lstm is None:
 
-            st.warning("lstm_forecast.csv not found.")
+            st.warning(f"{LSTM_FORECAST_CSV} not found.")
 
         else:
 
-            st.subheader("LSTM Forecast")
+            st.subheader(LSTM_FORECAST_TITLE)
 
             c1, c2, c3 = st.columns(3)
 
@@ -1339,7 +1319,7 @@ elif page == "Demand Forecasting":
 
                 lstm.to_csv(index=False),
 
-                file_name="lstm_forecast.csv",
+                file_name=LSTM_FORECAST_CSV,
 
                 mime=CSV_MIME
 
@@ -1402,7 +1382,7 @@ elif page == "Inventory Optimization":
 
     if inventory is None:
 
-        st.error("inventory_optimization.csv not found.")
+        st.error(f"{INVENTORY_OPTIMIZATION_CSV} not found.")
         st.stop()
 
     st.markdown(
@@ -1771,7 +1751,7 @@ elif page == "Inventory Optimization":
 
         inventory.to_csv(index=False),
 
-        file_name="inventory_optimization.csv",
+        file_name=INVENTORY_OPTIMIZATION_CSV,
 
         mime=CSV_MIME
 
@@ -1786,7 +1766,7 @@ elif page == "Customer Churn":
 
     if churn is None:
 
-        st.error("customer_churn_predictions.csv not found.")
+        st.error(f"{CUSTOMER_CHURN_PREDICTIONS_CSV} not found.")
         st.stop()
 
     st.markdown(
@@ -1891,7 +1871,7 @@ elif page == "Customer Churn":
                 y="Frequency",
                 color="Predicted",
                 size="Monetary",
-                hover_data=["Customer ID"],
+                hover_data=[CUSTOMER_ID],
                 title="Recency vs Frequency"
             )
 
@@ -1908,7 +1888,7 @@ elif page == "Customer Churn":
                 y="Monetary",
                 color="Predicted",
                 size="Recency",
-                hover_data=["Customer ID"],
+                hover_data=[CUSTOMER_ID],
                 title="Frequency vs Monetary"
             )
 
@@ -1988,7 +1968,7 @@ elif page == "Customer Churn":
             churn
             .groupby("Predicted")
             .agg(
-                Customers=("Customer ID", "count"),
+                Customers=(CUSTOMER_ID, "count"),
                 Avg_Recency=("Recency", "mean"),
                 Avg_Frequency=("Frequency", "mean"),
                 Avg_Monetary=("Monetary", "mean")
@@ -2052,7 +2032,7 @@ elif page == "Customer Churn":
     st.download_button(
         "⬇ Download Churn Predictions",
         churn.to_csv(index=False),
-        file_name="customer_churn_predictions.csv",
+        file_name=CUSTOMER_CHURN_PREDICTIONS_CSV,
         mime=CSV_MIME
     )
 # ==========================================================
@@ -2084,7 +2064,7 @@ elif page == "Reports":
             "Processed Retail",
             "Customer Segments",
             "Sales Forecast",
-            "LSTM Forecast",
+            LSTM_FORECAST_TITLE,
             "Inventory",
             "Customer Churn"
 
@@ -2157,7 +2137,7 @@ elif page == "Reports":
 
         if lstm is not None:
             st.download_button(
-                "LSTM Forecast",
+                LSTM_FORECAST_TITLE,
                 lstm.to_csv(index=False),
                 "lstm_forecast.csv",
                 CSV_MIME
