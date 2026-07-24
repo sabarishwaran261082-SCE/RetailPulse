@@ -115,6 +115,23 @@ churn = load_data(CUSTOMER_CHURN_PREDICTIONS_CSV)
 #st.write("Churn:", churn is not None)
 
 # -----------------------------------------------
+# MEMORY OPTIMIZATION
+# -----------------------------------------------
+
+MAX_PLOT_ROWS = 1000
+
+def sample_df(df, max_rows=MAX_PLOT_ROWS):
+    if df is None:
+        return None
+    if len(df) <= max_rows:
+        return df
+    return df.sample(max_rows, random_state=42)
+
+segments_plot = sample_df(segments)
+inventory_plot = sample_df(inventory)
+churn_plot = sample_df(churn)
+
+# -----------------------------------------------
 # CHECK DATA
 # -----------------------------------------------
 
@@ -732,15 +749,9 @@ elif page == "Sales Analytics":
 
     st.subheader("📊 Sales Heatmap")
 
-    heat = (
-        filtered
-        .pivot_table(
-            values="TotalPrice",
-            index="DayOfWeek",
-            columns="Hour",
-            aggfunc="sum",
-            fill_value=0
-        )
+    heat = filtered.sample(
+        min(len(filtered), 10000),
+        random_state=42,
     )
 
     fig = px.imshow(
@@ -849,7 +860,7 @@ elif page == "Customer Segmentation":
     with left:
 
         fig = px.scatter(
-            segments,
+            segments_plot,
             x="Recency",
             y="Frequency",
             color="Cluster",
@@ -863,7 +874,7 @@ elif page == "Customer Segmentation":
     with right:
 
         fig = px.scatter(
-            segments,
+            segments_plot,
             x="Frequency",
             y="Monetary",
             color="Cluster",
@@ -881,7 +892,7 @@ elif page == "Customer Segmentation":
     # --------------------------------------------------
 
     fig = px.scatter_3d(
-        segments,
+        segments_plot,
         x="Recency",
         y="Frequency",
         z="Monetary",
@@ -903,7 +914,7 @@ elif page == "Customer Segmentation":
     with left:
 
         fig = px.histogram(
-            segments,
+            segments_plot,
             x="Recency",
             nbins=30,
             color="Cluster",
@@ -915,7 +926,7 @@ elif page == "Customer Segmentation":
     with center:
 
         fig = px.histogram(
-            segments,
+            segments_plot,
             x="Frequency",
             nbins=30,
             color="Cluster",
@@ -927,7 +938,7 @@ elif page == "Customer Segmentation":
     with right:
 
         fig = px.histogram(
-            segments,
+            segments_plot,
             x="Monetary",
             nbins=30,
             color="Cluster",
@@ -976,7 +987,7 @@ elif page == "Customer Segmentation":
     with left:
 
         fig = px.box(
-            segments,
+            segments_plot,
             x="Cluster",
             y="Monetary",
             color="Cluster",
@@ -988,7 +999,7 @@ elif page == "Customer Segmentation":
     with right:
 
         fig = px.box(
-            segments,
+            segments_plot,
             x="Cluster",
             y="Frequency",
             color="Cluster",
@@ -1006,12 +1017,12 @@ elif page == "Customer Segmentation":
     st.subheader("Customer Segment Details")
 
     st.dataframe(
-        segments.sort_values(
-            ["Cluster", "Monetary"],
-            ascending=[True, False]
-        ),
-        use_container_width=True,
-        hide_index=True
+         segments.sort_values(
+             ["Cluster", "Monetary"],
+             ascending=[True, False]
+         ).head(500),
+         use_container_width=True,
+         hide_index=True
     )
 
     st.download_button(
@@ -1161,15 +1172,7 @@ elif page == "Demand Forecasting":
 
             st.subheader("Forecast Table")
 
-            st.dataframe(
-
-                forecast,
-
-                use_container_width=True,
-
-                hide_index=True
-
-            )
+            st.dataframe(forecast.head(500))
 
             st.download_button(
 
@@ -1303,15 +1306,7 @@ elif page == "Demand Forecasting":
 
             st.subheader("Prediction Table")
 
-            st.dataframe(
-
-                lstm,
-
-                use_container_width=True,
-
-                hide_index=True
-
-            )
+            st.dataframe(lstm.head(500))
 
             st.download_button(
 
@@ -1597,7 +1592,7 @@ elif page == "Inventory Optimization":
 
         fig = px.scatter(
 
-             inventory,
+             inventory_plot,
 
              x="Orders",
 
@@ -1627,7 +1622,7 @@ elif page == "Inventory Optimization":
 
         fig = px.scatter(
 
-            inventory,
+            inventory_plot,
 
             x="AvgQuantity",
 
@@ -1717,15 +1712,7 @@ elif page == "Inventory Optimization":
 
     st.subheader("🚨 Products to Reorder")
 
-    st.dataframe(
-
-        reorder,
-
-        use_container_width=True,
-
-        hide_index=True
-
-    )
+    st.dataframe(reorder.head(500))
 
     st.divider()
 
@@ -1735,15 +1722,7 @@ elif page == "Inventory Optimization":
 
     st.subheader("Inventory Table")
 
-    st.dataframe(
-
-        inventory,
-
-        use_container_width=True,
-
-        hide_index=True
-
-    )
+    st.dataframe(inventory.head(500))
 
     st.download_button(
 
@@ -1866,7 +1845,7 @@ elif page == "Customer Churn":
         with left:
 
             fig = px.scatter(
-                churn,
+                churn_plot,
                 x="Recency",
                 y="Frequency",
                 color="Predicted",
@@ -1883,7 +1862,7 @@ elif page == "Customer Churn":
         with right:
 
             fig = px.scatter(
-                churn,
+                churn_plot,
                 x="Frequency",
                 y="Monetary",
                 color="Predicted",
@@ -1910,7 +1889,7 @@ elif page == "Customer Churn":
         with left:
 
             fig = px.histogram(
-                churn,
+                churn_plot,
                 x="Recency",
                 color="Predicted",
                 nbins=30,
@@ -1925,7 +1904,7 @@ elif page == "Customer Churn":
         with center:
 
             fig = px.histogram(
-                churn,
+                churn_plot,
                 x="Frequency",
                 color="Predicted",
                 nbins=30,
@@ -1940,7 +1919,7 @@ elif page == "Customer Churn":
         with right:
 
             fig = px.histogram(
-                churn,
+                churn_plot,
                 x="Monetary",
                 color="Predicted",
                 nbins=30,
@@ -1986,9 +1965,10 @@ elif page == "Customer Churn":
         st.subheader("Customer Summary")
 
         st.dataframe(
-            summary,
-            use_container_width=True,
-            hide_index=True
+             churn.sort_values(
+                 "Predicted",
+                  ascending=False
+            ).head(500)
         )
 
     st.divider()
@@ -2102,11 +2082,16 @@ elif page == "Reports":
     with c1:
 
         if retail is not None:
-            st.download_button(
+           with open(
+                 DATA_PATH / "online_retail_processed.csv",
+                 "rb"
+              ) as f:
+
+             st.download_button(
                 "Processed Retail Dataset",
-                retail.to_csv(index=False),
-                "online_retail_processed.csv",
-                CSV_MIME
+                 data=f,
+                 file_name="online_retail_processed.csv",
+                 mime="text/csv"
             )
 
         if forecast is not None:
